@@ -16550,9 +16550,9 @@ For more info, visit https://reactjs.org/link/mock-scheduler`);
               return jsxWithValidation(type, props, key, false);
             }
           }
-          var jsx8 = jsxWithValidationDynamic;
+          var jsx5 = jsxWithValidationDynamic;
           var jsxs2 = jsxWithValidationStatic;
-          exports.jsx = jsx8;
+          exports.jsx = jsx5;
           exports.jsxs = jsxs2;
         })();
       }
@@ -16570,6 +16570,9 @@ For more info, visit https://reactjs.org/link/mock-scheduler`);
       }
     }
   });
+
+  // extensions/discounts-view/src/index.jsx
+  var import_react10 = __toESM(require_react());
 
   // node_modules/@remote-ui/core/build/esm/component.mjs
   function createRemoteComponent(componentType) {
@@ -17200,9 +17203,6 @@ For more info, visit https://reactjs.org/link/mock-scheduler`);
   // node_modules/@shopify/ui-extensions/build/esm/surfaces/checkout/extension.mjs
   var extension = createExtensionRegistrationFunction();
 
-  // node_modules/@shopify/ui-extensions/build/esm/surfaces/checkout/components/Banner/Banner.mjs
-  var Banner = createRemoteComponent("Banner");
-
   // node_modules/@shopify/ui-extensions/build/esm/surfaces/checkout/components/Text/Text.mjs
   var Text = createRemoteComponent("Text");
 
@@ -17500,14 +17500,11 @@ ${errorInfo.componentStack}`);
     }
   };
 
-  // node_modules/@shopify/ui-extensions-react/build/esm/surfaces/checkout/components/Banner/Banner.mjs
-  var Banner2 = createRemoteReactComponent(Banner);
-
   // node_modules/@shopify/ui-extensions-react/build/esm/surfaces/checkout/components/Text/Text.mjs
   var Text2 = createRemoteReactComponent(Text);
 
   // node_modules/@shopify/ui-extensions-react/build/esm/surfaces/checkout/hooks/api.mjs
-  var import_react9 = __toESM(require_react(), 1);
+  var import_react8 = __toESM(require_react(), 1);
 
   // node_modules/@shopify/ui-extensions-react/build/esm/surfaces/checkout/errors.mjs
   var CheckoutUIExtensionError = class extends Error {
@@ -17519,7 +17516,7 @@ ${errorInfo.componentStack}`);
 
   // node_modules/@shopify/ui-extensions-react/build/esm/surfaces/checkout/hooks/api.mjs
   function useApi(_target) {
-    const api = (0, import_react9.useContext)(ExtensionApiContext);
+    const api = (0, import_react8.useContext)(ExtensionApiContext);
     if (api == null) {
       throw new CheckoutUIExtensionError("You can only call this hook when running as a UI extension.");
     }
@@ -17527,10 +17524,10 @@ ${errorInfo.componentStack}`);
   }
 
   // node_modules/@shopify/ui-extensions-react/build/esm/surfaces/checkout/hooks/subscription.mjs
-  var import_react10 = __toESM(require_react(), 1);
+  var import_react9 = __toESM(require_react(), 1);
   function useSubscription(subscription) {
-    const [, setValue] = (0, import_react10.useState)(subscription.current);
-    (0, import_react10.useEffect)(() => {
+    const [, setValue] = (0, import_react9.useState)(subscription.current);
+    (0, import_react9.useEffect)(() => {
       let didUnsubscribe = false;
       const checkForUpdates = (newValue) => {
         if (didUnsubscribe) {
@@ -17563,41 +17560,45 @@ ${errorInfo.componentStack}`);
     return useSubscription(api.target);
   }
 
-  // extensions/discounts-view/src/extension.jsx
-  var import_react11 = __toESM(require_react());
+  // extensions/discounts-view/src/index.jsx
   var import_jsx_runtime4 = __toESM(require_jsx_runtime());
+  var src_default = reactExtension(
+    "purchase.checkout.cart-line-item.render-after",
+    () => /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Extension, {})
+  );
   function Extension() {
     const { query } = useApi();
-    const { cost, merchandise, quantity } = useTarget();
-    const [compareAtPrices, setCompareAtPrices] = (0, import_react11.useState)({});
-    console.log(merchandise.id);
-    (0, import_react11.useEffect)(() => {
+    const { title, lines } = useTarget();
+    const [compareAtPrices, setCompareAtPrices] = (0, import_react10.useState)({});
+    (0, import_react10.useEffect)(() => {
       const fetchCompareAtPrices = () => __async(this, null, function* () {
         var _a, _b, _c;
         const newCompareAtPrices = {};
         try {
-          const variantId = merchandise.id;
-          const result = yield query(
-            `query($variantId: ID!) {
-              node(id: $variantId) {
-                ... on ProductVariant {
-                  compareAtPrice{
-                    amount
-                  }
+          for (const lineItem of lines) {
+            const variantId = lineItem.merchandise.id;
+            const result = yield query(
+              `query($variantId: ID!) {
+            node(id: $variantId) {
+              ... on ProductVariant {
+                compareAtPrice{
+                  amount
                 }
               }
-            }`,
-            {
-              variables: {
-                variantId
-              }
             }
-          );
-          const compareAtPrice = (_c = (_b = (_a = result.data) == null ? void 0 : _a.node) == null ? void 0 : _b.compareAtPrice) == null ? void 0 : _c.amount;
-          if (compareAtPrice) {
-            newCompareAtPrices[merchandise.id] = compareAtPrice;
-          } else {
-            console.log("This product variant does not have a compare at price.");
+          }`,
+              {
+                variables: {
+                  variantId
+                }
+              }
+            );
+            const compareAtPrice = (_c = (_b = (_a = result.data) == null ? void 0 : _a.node) == null ? void 0 : _b.compareAtPrice) == null ? void 0 : _c.amount;
+            if (compareAtPrice) {
+              newCompareAtPrices[lineItem.id] = compareAtPrice;
+            } else {
+              console.log("This product variant does not have a compare at price.");
+            }
           }
           setCompareAtPrices(newCompareAtPrices);
         } catch (error) {
@@ -17605,20 +17606,17 @@ ${errorInfo.componentStack}`);
         }
       });
       fetchCompareAtPrices();
-    }, [query, merchandise]);
-    const originalPrice = Number(compareAtPrices[merchandise.id]) * quantity;
-    const currentPrice = Number(cost.totalAmount.amount);
-    const discount = calculateDiscount(originalPrice, currentPrice);
-    return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(import_jsx_runtime4.Fragment, { children: [
-      originalPrice > 0 && /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(Text2, { appearance: "subdued", children: [
+    }, [query, lines]);
+    return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(import_jsx_runtime4.Fragment, { children: lines.map((lineItem) => {
+      const price = compareAtPrices[lineItem.id];
+      if (!price) {
+        return null;
+      }
+      return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(Text2, { appearance: "subdued", children: [
         "Regular Price: ",
-        formatMoney(originalPrice, "USD")
-      ] }, merchandise.id),
-      discount > 50 && /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(Text2, { appearance: "critical", emphasis: "bold", children: [
-        " ",
-        " FINAL SALE"
-      ] })
-    ] });
+        formatMoney(price, "USD")
+      ] }, lineItem.id);
+    }) });
     function formatMoney(amount = 0, currencyCode = "USD") {
       const options = {
         style: "currency",
@@ -17631,44 +17629,5 @@ ${errorInfo.componentStack}`);
       const formatter = new Intl.NumberFormat("en-US", options);
       return formatter.format(amount);
     }
-    function calculateDiscount(originalPrice2, currentPrice2) {
-      console.log(originalPrice2 + " ORIGINAL PRICE");
-      console.log(currentPrice2 + " CURRENT PRICE");
-      const originalPriceInDollars = originalPrice2 / 100;
-      const currentPriceInDollars = currentPrice2 / 100;
-      const discount2 = (originalPriceInDollars - currentPriceInDollars) / originalPriceInDollars * 100;
-      return Math.round(discount2);
-    }
-  }
-
-  // extensions/discounts-view/src/Checkout.jsx
-  var import_jsx_runtime5 = __toESM(require_jsx_runtime());
-  var Checkout_default = reactExtension(
-    "purchase.checkout.cart-line-item.render-after",
-    () => /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Extension, {})
-  );
-
-  // extensions/discounts-view/src/Thankyou.jsx
-  var import_jsx_runtime6 = __toESM(require_jsx_runtime());
-  var Thankyou_default = reactExtension(
-    "purchase.thank-you.cart-line-item.render-after",
-    () => /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Extension, {})
-  );
-
-  // extensions/discounts-view/src/Status.jsx
-  var import_jsx_runtime7 = __toESM(require_jsx_runtime());
-  var Status_default = reactExtension(
-    "customer-account.order-status.cart-line-item.render-after",
-    () => /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Extension, {})
-  );
-
-  // extensions/discounts-view/src/Dynamic.jsx
-  var import_jsx_runtime8 = __toESM(require_jsx_runtime());
-  var Dynamic_default = reactExtension(
-    "purchase.checkout.block.render",
-    () => /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(App, {})
-  );
-  function App() {
-    return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Banner2, { children: "This extension is rendering in the extension target." });
   }
 })();

@@ -5,9 +5,7 @@ import {
 import { Extension } from './extension.jsx';
 
 export default reactExtension(
-  'purchase.checkout.cart-line-item.render-after',
+  'purchase.thank-you.cart-line-item.render-after',
   () => <Extension />,
 );
-
-
 

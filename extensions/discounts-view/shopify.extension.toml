@@ -18,6 +18,14 @@ handle = "discounts-view"
 module = "./src/Checkout.jsx"
 target = "purchase.checkout.cart-line-item.render-after"
 
+[[extensions.targeting]]
+module = "./src/Thankyou.jsx"
+target = "purchase.thank-you.cart-line-item.render-after"
+
+[[extensions.targeting]]
+module = "./src/Status.jsx"
+target = "customer-account.order-status.cart-line-item.render-after"
+
 [extensions.capabilities]
 # Gives your extension access to directly query Shopify’s storefront API.
 # https://shopify.dev/docs/api/checkout-ui-extensions/unstable/configuration#api-access
